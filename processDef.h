@@ -8,6 +8,7 @@ typedef struct process {
     int tat;
     int wt;
     int rt;
+    char *name;
 } Pr;
 
 #endif
