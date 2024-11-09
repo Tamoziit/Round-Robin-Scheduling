@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
+#include <unistd.h>
 #include "processDef.h"
 #include "queueDef.h"
 
@@ -10,18 +12,23 @@ Pr *sortProcesses(Pr *arr, int n);
 void enQueue(QL **front, QL **rear, Pr val);
 Pr deQueue(QL **front);
 void printQueue(QL *front);
+void *scheduler(void* threadargs);
 
+pthread_mutex_t mutex;
 
 /* Master Thread */
 int main()
 {
 	Pr *P;
-	int n, qt, st, i, tt=0;
+	int n, qt, st, i, tt=0, status;
 	printf("Enter the no. of Processes\n");
 	scanf("%d", &n);
+	
 	P = (Pr*)malloc(n*sizeof(Pr));
+	pthread_t threads[n];
 	char buffer[5];
 	QL *front = NULL, *rear = NULL;
+	void *retval;
 	
 	for(i=0; i<n; i++)
 	{
@@ -52,5 +59,21 @@ int main()
 	Pr temp = deQueue(&front);
 	printf("%s\n", temp.name);*/
 	
-	return 0;
+	for(i=0; i<n; i++)
+	{
+		if((status=pthread_create(&threads[i], NULL, &scheduler, (void*)&P[i])))
+		{
+			printf("Thread creation failed\n");
+			exit(0);
+		}
+	}
+	
+	for(i=0; i<n; i++)
+	{
+		pthread_join(threads[i], &retval);
+		printf("Thread %d exited with retval = %lu\n", i+1, retval);
+	}
+	
+	pthread_mutex_destroy(&mutex);
+	pthread_exit(NULL);
 }
