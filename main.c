@@ -15,19 +15,20 @@ void printQueue(QL *front);
 void *scheduler(void* threadargs);
 
 pthread_mutex_t mutex;
+int tt = 10, turn;
+QL *front = NULL, *rear = NULL;
 
 /* Master Thread */
 int main()
 {
 	Pr *P;
-	int n, qt, st, i, tt=0, status;
+	int n, qt, st, i, status;
 	printf("Enter the no. of Processes\n");
 	scanf("%d", &n);
 	
 	P = (Pr*)malloc(n*sizeof(Pr));
 	pthread_t threads[n];
 	char buffer[5];
-	QL *front = NULL, *rear = NULL;
 	void *retval;
 	
 	for(i=0; i<n; i++)
@@ -53,14 +54,21 @@ int main()
 	printf("\n\n");
 	
 	/* Ready Queue Test */
-	/*enQueue(&front, &rear, P[0]);
+	enQueue(&front, &rear, P[0]);
+	P[0].index = 1;
 	enQueue(&front, &rear, P[1]);
+	P[1].index = 2;
 	printQueue(front);
-	Pr temp = deQueue(&front);
-	printf("%s\n", temp.name);*/
+	//Pr temp = deQueue(&front);
+	//printf("%s\n", temp.name);
+	printf("from main; Front = %u, Rear = %u\n", front, rear);
+	turn = 1;
+	
+	printf("Initially; tt = %d, addr = %u\n", tt, &tt);
 	
 	for(i=0; i<n; i++)
 	{
+		printf("From main; turn = %d\n", P[i].index);
 		if((status=pthread_create(&threads[i], NULL, &scheduler, (void*)&P[i])))
 		{
 			printf("Thread creation failed\n");
