@@ -8,11 +8,16 @@
 extern pthread_mutex_t mutex;
 extern int tt, turn, qt, st;
 
+void enQueue(QL **front, QL **rear, Pr val);
+Pr deQueue(QL **front);
+
 void *scheduler(void* threadargs)
 {
 	Pr *P = (Pr*)threadargs;
 	pthread_t sid;
 	extern QL *front, *rear;
+	Pr temp;
+	int timeSlice = 0;
 	
 	while(turn != P->index)
 	{
@@ -27,28 +32,33 @@ void *scheduler(void* threadargs)
 			sid = pthread_self();
 			printf("%s: AT = %d, BT = %d, Rem T = %d, ID = %lu\n", P->name, P->at, P->bt, P->remt, sid);
 			
-			if(P->remt < qt)
-			{
-				tt+=P->remt;
-				P->remt = 0;
-			}
-			else
-			{
-				P->remt-=qt;
-				tt+=qt;
-			}
+			while(timeSlice < qt && P->remt > 0)
+            {
+                tt++;
+                P->remt--;
+                timeSlice++;
+                sleep(1);
+            }
 			
 			tt+=st;
-			printf("%d; %u\n", tt, &tt);
-			if(turn == 2)
-				turn = 1;
-			else
-				turn++;
+			printf("time = %d; %u\n", tt, &tt);
+			
+			// ready queue update
+			if(P->remt > 0)
+				enQueue(&front, &rear, *P);
+				
+			temp = deQueue(&front);
+			turn = temp.index;
+			
 			printf("Next Turn = %d\n", turn);
 		pthread_mutex_unlock(&mutex);
-		sleep(2);
+		
+		timeSlice = 0;
+		sleep(1);
 	}
 	
 	if(P->remt == 0)
+	{
 		pthread_exit((void*)(long)sid);
+	}
 }

@@ -13,21 +13,24 @@ void enQueue(QL **front, QL **rear, Pr val);
 Pr deQueue(QL **front);
 void printQueue(QL *front);
 void *scheduler(void* threadargs);
+void *queueCreator(void* threadargs);
 
 pthread_mutex_t mutex;
-int tt, turn, qt, st;
+pthread_mutex_t mutex2;
+int tt, turn, qt, st, n;
 QL *front = NULL, *rear = NULL;
 
 /* Master Thread */
 int main()
 {
 	Pr *P;
-	int n, i, status;
+	int i, status;
 	printf("Enter the no. of Processes\n");
 	scanf("%d", &n);
 	
 	P = (Pr*)malloc(n*sizeof(Pr));
 	pthread_t threads[n];
+	pthread_t queueCreate;
 	char buffer[5];
 	void *retval;
 	
@@ -38,6 +41,7 @@ int main()
 		sprintf(buffer, "P%d", i + 1);
         P[i].name = strdup(buffer);
         P[i].remt = P[i].bt;
+        P[i].index = i+1;
 	}
 	
 	printf("Enter Time Quantum size\n");
@@ -54,17 +58,14 @@ int main()
 		printf("%s:(%d) ", P[i].name, P[i].at);
 	printf("\n\n");
 	
-	/* Ready Queue Test */
-	enQueue(&front, &rear, P[0]);
-	P[0].index = 1;
-	enQueue(&front, &rear, P[1]);
-	P[1].index = 2;
-	printQueue(front);
-	//Pr temp = deQueue(&front);
-	//printf("%s\n", temp.name);
-	printf("from main; Front = %u, Rear = %u\n", front, rear);
-	turn = 1;
+	/* Round Robin Init */
+	turn = P[0].index;
 	tt = P[0].at;
+	if((status=pthread_create(&queueCreate, NULL, &queueCreator, (void*)P)))
+	{
+		printf("Thread creation failed\n");
+		exit(0);
+	}
 	
 	printf("Initially; tt = %d, addr = %u\n", tt, &tt);
 	
@@ -86,8 +87,12 @@ int main()
 		sleep(1);
 	}
 	
-	printf("Final Time = %d\n", tt);
+	pthread_join(queueCreate, &retval);
+	printf("Queuer exited with retval = %lu\n", retval);
+	
+	printf("Final Time = %d\n", tt-1);
 	
 	pthread_mutex_destroy(&mutex);
+	pthread_mutex_destroy(&mutex2);
 	pthread_exit(NULL);
 }

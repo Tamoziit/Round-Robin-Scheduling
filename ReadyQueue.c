@@ -7,6 +7,7 @@
 void enQueue(QL **front, QL **rear, Pr val)
 {
     QL *new = (QL *)malloc(sizeof(QL));
+    val.enqueued = 1;
     new->data = val;
     new->link = NULL;
     if (*front == NULL)
@@ -35,6 +36,7 @@ Pr deQueue(QL **front)
         QL *temp = h;
         h = h->link;
         val = temp->data;
+        val.enqueued = 0;
         free(temp);
         *front = h;
         return val;

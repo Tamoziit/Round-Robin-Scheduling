@@ -11,6 +11,7 @@ typedef struct process {
     int rt;
     char *name;
     int index;
+    int enqueued;
 } Pr;
 
 #endif
