@@ -15,14 +15,14 @@ void printQueue(QL *front);
 void *scheduler(void* threadargs);
 
 pthread_mutex_t mutex;
-int tt = 10, turn;
+int tt, turn, qt, st;
 QL *front = NULL, *rear = NULL;
 
 /* Master Thread */
 int main()
 {
 	Pr *P;
-	int n, qt, st, i, status;
+	int n, i, status;
 	printf("Enter the no. of Processes\n");
 	scanf("%d", &n);
 	
@@ -37,6 +37,7 @@ int main()
 		scanf("%d%d", &P[i].at, &P[i].bt);
 		sprintf(buffer, "P%d", i + 1);
         P[i].name = strdup(buffer);
+        P[i].remt = P[i].bt;
 	}
 	
 	printf("Enter Time Quantum size\n");
@@ -63,6 +64,7 @@ int main()
 	//printf("%s\n", temp.name);
 	printf("from main; Front = %u, Rear = %u\n", front, rear);
 	turn = 1;
+	tt = P[0].at;
 	
 	printf("Initially; tt = %d, addr = %u\n", tt, &tt);
 	
@@ -80,7 +82,11 @@ int main()
 	{
 		pthread_join(threads[i], &retval);
 		printf("Thread %d exited with retval = %lu\n", i+1, retval);
+		printf("Total time when this thread exits = %d\n", tt);
+		sleep(1);
 	}
+	
+	printf("Final Time = %d\n", tt);
 	
 	pthread_mutex_destroy(&mutex);
 	pthread_exit(NULL);

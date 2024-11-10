@@ -6,7 +6,7 @@
 #include "queueDef.h"
 
 extern pthread_mutex_t mutex;
-extern int tt, turn;
+extern int tt, turn, qt, st;
 
 void *scheduler(void* threadargs)
 {
@@ -14,25 +14,41 @@ void *scheduler(void* threadargs)
 	pthread_t sid;
 	extern QL *front, *rear;
 	
-	printf("Turn = %d\n", turn);
+	while(turn != P->index)
+	{
+		printf("Index = %d waiting...\n", P->index);
+		sleep(1);
+	}
 	
-	while(turn != P->index);
+	while(P->remt > 0)
+	{
+		pthread_mutex_lock(&mutex);
+			printf("My Turn = %d\n", turn);
+			sid = pthread_self();
+			printf("%s: AT = %d, BT = %d, Rem T = %d, ID = %lu\n", P->name, P->at, P->bt, P->remt, sid);
+			
+			if(P->remt < qt)
+			{
+				tt+=P->remt;
+				P->remt = 0;
+			}
+			else
+			{
+				P->remt-=qt;
+				tt+=qt;
+			}
+			
+			tt+=st;
+			printf("%d; %u\n", tt, &tt);
+			if(turn == 2)
+				turn = 1;
+			else
+				turn++;
+			printf("Next Turn = %d\n", turn);
+		pthread_mutex_unlock(&mutex);
+		sleep(2);
+	}
 	
-	pthread_mutex_lock(&mutex);
-	sid = pthread_self();
-	printf("%s: AT = %d, BT = %d, ID = %lu\n", P->name, P->at, P->bt, sid);
-	tt++;
-	printf("%d; %u\n", tt, &tt);
-	if(turn == 2)
-		turn = 1;
-	else
-		turn++;
-	sleep(2);
-	//printf("Front = %u, Rear = %u\n", front, rear);
-	pthread_mutex_unlock(&mutex);
-	
-	if(P->bt == 0)
+	if(P->remt == 0)
 		pthread_exit((void*)(long)sid);
-	else
-		scheduler(P);
 }
