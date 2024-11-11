@@ -8,6 +8,7 @@
 
 /* Prototype defn. */
 void table1(Pr *P, int n, int qt, int st);
+void table2(Pr *P, int n, int qt, int st, int switchCount, int tt);
 Pr *sortProcesses(Pr *arr, int n);
 void enQueue(QL **front, QL **rear, Pr val);
 Pr deQueue(QL **front);
@@ -18,7 +19,7 @@ void *queueCreator(void* threadargs);
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t turn_cond = PTHREAD_COND_INITIALIZER;
 
-int tt, turn, qt, st, n;
+int tt, turn, qt, st, n, switchCount = 0;
 QL *front = NULL, *rear = NULL;
 
 typedef struct {
@@ -37,7 +38,6 @@ int main()
 	
 	P = (Pr*)malloc(n*sizeof(Pr));
 	pthread_t threads[n];
-	pthread_t queueCreate;
 	char buffer[5];
 	void *retval;
 	
@@ -63,13 +63,13 @@ int main()
 	printf("Sorted processes:\n");
 	for(i=0; i<n; i++)
 		printf("%s:(%d); turn = %d ", P[i].name, P[i].at, P[i].index);
-	printf("\n\n");
+	printf("\n");
 	
 	/* Round Robin Init */
 	turn = P[0].index;
 	tt = P[0].at;
 	
-	printf("Initially; tt = %d, addr = %u\n", tt, &tt);
+	printf("Initially; tt = %d\n\nEvaluating Gantt Chart...\n\n", tt);
 	
 	for(i=0; i<n; i++)
 	{
@@ -85,15 +85,19 @@ int main()
 		}
 	}
 	
+	
 	for(i=0; i<n; i++)
 	{
 		pthread_join(threads[i], &retval);
 		sleep(1);
 	}
-
-	printf("\n\nFinal Time = %d\n", tt-1);
+	
+	printf("\n");
+	table2(P, n, qt, st, switchCount, tt);
+	printf("Final Time = %d\n", tt-st);
 	
 	pthread_mutex_destroy(&mutex);
 	pthread_cond_destroy(&turn_cond);
+	free(P);
 	pthread_exit(NULL);
 }

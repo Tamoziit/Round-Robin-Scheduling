@@ -9,6 +9,7 @@ typedef struct process {
     int tat;
     int wt;
     int rt;
+    int start;
     char *name;
     int index;
     int enqueued;

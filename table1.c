@@ -1,6 +1,6 @@
-#include "processDef.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "processDef.h"
 
 void table1(Pr *P, int n, int qt, int st)
 {

@@ -7,7 +7,7 @@
 
 extern pthread_mutex_t mutex;
 extern pthread_cond_t turn_cond;
-extern int tt, turn, qt, st;
+extern int tt, turn, qt, st, switchCount;
 extern QL *front, *rear;
 
 typedef struct {
@@ -53,21 +53,24 @@ void *scheduler(void* threadargs)
     
 	pthread_t sid;
 	Pr temp;
-	int timeSlice = 0;
+	int timeSlice = 0, i;
 	
 	while (1) {
         pthread_mutex_lock(&mutex);
 
         while (turn != P->index) {
-            //pthread_cond_wait(&turn_cond, &mutex);
+        	pthread_cond_wait(&turn_cond, &mutex);
             sleep(1);
         }
 
         if (P->remt > 0) {
             sid = pthread_self();
             P->cpu = 1;
+            //printf("Turn = %d\n", turn);
 
             while (timeSlice < qt && P->remt > 0) {
+            	if(P->remt == P->bt)
+            		P->start = tt;
                 tt++;
                 printf(" %s ", P->name);
                 P->remt--;
@@ -79,19 +82,25 @@ void *scheduler(void* threadargs)
             if (P->remt > 0) {
                 enQueue(&front, &rear, *P);
             }
+            if(P->remt == 0)
+            	P->ct = tt;
 
-            tt += st;
+            for(i=1; i<=st; i++)
+            {
+            	tt++;
+            	switchCount++;
+            	queueMaintainer(allProcesses, n);
+            }
             printf(" X ");
 
-            queueMaintainer(allProcesses, n);
             Pr temp = deQueue(&front);
             if (temp.index != -1) {
                 turn = temp.index;
             } else {
                 advanceTimeDeadlockAvoider(allProcesses, n);
             }
-
-            //pthread_cond_broadcast(&turn_cond);
+			//printf("Next turn = %d\n", turn);
+			pthread_cond_broadcast(&turn_cond);
         }
 
         pthread_mutex_unlock(&mutex);
