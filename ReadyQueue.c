@@ -4,59 +4,57 @@
 #include "processDef.h"
 #include "queueDef.h"
 
-void enQueue(QL **front, QL **rear, Pr val)
-{
-    QL *new = (QL *)malloc(sizeof(QL));
+void enQueue(QL **front, QL **rear, Pr val) {
+    QL *newNode = (QL *)malloc(sizeof(QL));
+    if (!newNode) {
+        printf("Memory allocation failed\n");
+        return;
+    }
+
     val.enqueued = 1;
-    new->data = val;
-    new->link = NULL;
-    if (*front == NULL)
-    {
-        *front = new;
-        *rear = new;
-    }
-    else
-    {
-        (*rear)->link = new;
-        *rear = new;
+    newNode->data = val;
+    newNode->link = NULL;
+
+    if (*front == NULL) {
+        *front = newNode;
+        *rear = newNode;
+    } else {
+        (*rear)->link = newNode;
+        *rear = newNode;
     }
 }
 
-Pr deQueue(QL **front)
-{
-    QL *h = *front;
+Pr deQueue(QL **front) {
     Pr val;
-    if (h == NULL)
-    {
-        printf("Empty Queue\n");
+    val.name = NULL;
+    
+    if (*front == NULL) {
+        val.index = -1;
         return val;
     }
-    else
-    {
-        QL *temp = h;
-        h = h->link;
-        val = temp->data;
-        val.enqueued = 0;
-        free(temp);
-        *front = h;
-        return val;
-    }
+
+    QL *temp = *front;
+    val = temp->data;
+    *front = (*front)->link;
+
+    val.enqueued = 0;
+    free(temp);
+
+    return val;
 }
 
-void printQueue(QL *front)
-{
+void printQueue(QL *front) {
     QL *curr = front;
-    if (curr == NULL)
-    {
+    if (curr == NULL) {
         printf("Empty Queue\n");
+        return;
     }
-    else
-    {
-        while (curr != NULL)
-        {
-            printf("%s ", curr->data.name);
-            curr = curr->link;
-        }
-        printf("\n");
+
+    printf("[DEBUG] Current Queue: ");
+    while (curr != NULL) {
+        printf("%s ", curr->data.name);
+        curr = curr->link;
     }
+    printf("\n");
 }
+

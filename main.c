@@ -15,10 +15,17 @@ void printQueue(QL *front);
 void *scheduler(void* threadargs);
 void *queueCreator(void* threadargs);
 
-pthread_mutex_t mutex;
-pthread_mutex_t mutex2;
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t turn_cond = PTHREAD_COND_INITIALIZER;
+
 int tt, turn, qt, st, n;
 QL *front = NULL, *rear = NULL;
+
+typedef struct {
+    Pr *currentProcess;
+    Pr *processArray;
+    int numProcesses;
+} ThreadArgs;
 
 /* Master Thread */
 int main()
@@ -55,24 +62,23 @@ int main()
 	P = sortProcesses(P, n);
 	printf("Sorted processes:\n");
 	for(i=0; i<n; i++)
-		printf("%s:(%d) ", P[i].name, P[i].at);
+		printf("%s:(%d); turn = %d ", P[i].name, P[i].at, P[i].index);
 	printf("\n\n");
 	
 	/* Round Robin Init */
 	turn = P[0].index;
 	tt = P[0].at;
-	if((status=pthread_create(&queueCreate, NULL, &queueCreator, (void*)P)))
-	{
-		printf("Thread creation failed\n");
-		exit(0);
-	}
 	
 	printf("Initially; tt = %d, addr = %u\n", tt, &tt);
 	
 	for(i=0; i<n; i++)
 	{
-		printf("From main; turn = %d\n", P[i].index);
-		if((status=pthread_create(&threads[i], NULL, &scheduler, (void*)&P[i])))
+		ThreadArgs *args = (ThreadArgs*)malloc(sizeof(ThreadArgs));
+		args->currentProcess = &P[i];
+		args->processArray = P;
+		args->numProcesses = n;
+		
+		if((status=pthread_create(&threads[i], NULL, &scheduler, (void*)args)))
 		{
 			printf("Thread creation failed\n");
 			exit(0);
@@ -82,17 +88,12 @@ int main()
 	for(i=0; i<n; i++)
 	{
 		pthread_join(threads[i], &retval);
-		printf("Thread %d exited with retval = %lu\n", i+1, retval);
-		printf("Total time when this thread exits = %d\n", tt);
 		sleep(1);
 	}
-	
-	pthread_join(queueCreate, &retval);
-	printf("Queuer exited with retval = %lu\n", retval);
-	
-	printf("Final Time = %d\n", tt-1);
+
+	printf("\n\nFinal Time = %d\n", tt-1);
 	
 	pthread_mutex_destroy(&mutex);
-	pthread_mutex_destroy(&mutex2);
+	pthread_cond_destroy(&turn_cond);
 	pthread_exit(NULL);
 }
