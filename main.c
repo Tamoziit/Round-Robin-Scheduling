@@ -12,14 +12,12 @@ void table2(Pr *P, int n, int qt, int st, int switchCount, int tt);
 Pr *sortProcesses(Pr *arr, int n);
 void enQueue(QL **front, QL **rear, Pr val);
 Pr deQueue(QL **front);
-void printQueue(QL *front);
 void *scheduler(void* threadargs);
-void *queueCreator(void* threadargs);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t turn_cond = PTHREAD_COND_INITIALIZER;
 
-int tt, turn, qt, st, n, switchCount = 0;
+int tt, turn, qt, st, n, switchCount = 0, totalRemt = 0;
 QL *front = NULL, *rear = NULL;
 
 typedef struct {
@@ -48,6 +46,7 @@ int main()
 		sprintf(buffer, "P%d", i + 1);
         P[i].name = strdup(buffer);
         P[i].remt = P[i].bt;
+        totalRemt += P[i].remt;
         P[i].index = i+1;
 	}
 	
@@ -62,7 +61,7 @@ int main()
 	P = sortProcesses(P, n);
 	printf("Sorted processes:\n");
 	for(i=0; i<n; i++)
-		printf("%s:(%d); turn = %d ", P[i].name, P[i].at, P[i].index);
+		printf("%s:(%d); index = %d ", P[i].name, P[i].at, P[i].index);
 	printf("\n");
 	
 	/* Round Robin Init */

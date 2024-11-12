@@ -42,19 +42,3 @@ Pr deQueue(QL **front) {
 
     return val;
 }
-
-void printQueue(QL *front) {
-    QL *curr = front;
-    if (curr == NULL) {
-        printf("Empty Queue\n");
-        return;
-    }
-
-    printf("[DEBUG] Current Queue: ");
-    while (curr != NULL) {
-        printf("%s ", curr->data.name);
-        curr = curr->link;
-    }
-    printf("\n");
-}
-

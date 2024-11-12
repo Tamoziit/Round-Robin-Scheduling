@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 #include "processDef.h"
 #include "queueDef.h"
 
 extern pthread_mutex_t mutex;
 extern pthread_cond_t turn_cond;
-extern int tt, turn, qt, st, switchCount;
+extern int tt, turn, qt, st, switchCount, totalRemt;
 extern QL *front, *rear;
 
 typedef struct {
@@ -36,6 +37,7 @@ void *queueMaintainer(Pr* P, int n)
 void advanceTimeDeadlockAvoider(Pr* processArray, int n) {
     for (int i = 0; i < n; i++) {
         if (processArray[i].cpu == 0 && processArray[i].at > tt) {
+        	switchCount += (processArray[i].at - tt);
             tt = processArray[i].at;
             turn = processArray[i].index;
             pthread_cond_broadcast(&turn_cond);
@@ -54,13 +56,15 @@ void *scheduler(void* threadargs)
 	pthread_t sid;
 	Pr temp;
 	int timeSlice = 0, i;
+	struct timespec ts;
+    ts.tv_sec = 1;
+    ts.tv_nsec = 0; 
 	
 	while (1) {
         pthread_mutex_lock(&mutex);
 
         while (turn != P->index) {
         	pthread_cond_wait(&turn_cond, &mutex);
-            sleep(1);
         }
 
         if (P->remt > 0) {
@@ -74,9 +78,10 @@ void *scheduler(void* threadargs)
                 tt++;
                 printf(" %s ", P->name);
                 P->remt--;
+                totalRemt--;
                 timeSlice++;
                 queueMaintainer(allProcesses, n);
-                sleep(1);
+                nanosleep(&ts, NULL);
             }
 
             if (P->remt > 0) {
@@ -91,7 +96,8 @@ void *scheduler(void* threadargs)
             	switchCount++;
             	queueMaintainer(allProcesses, n);
             }
-            printf(" X ");
+            if(totalRemt > 0)
+            	printf(" X ");
 
             Pr temp = deQueue(&front);
             if (temp.index != -1) {
@@ -105,7 +111,6 @@ void *scheduler(void* threadargs)
 
         pthread_mutex_unlock(&mutex);
         timeSlice = 0;
-        sleep(1);
 
         if (P->remt == 0) {
             free(args);
