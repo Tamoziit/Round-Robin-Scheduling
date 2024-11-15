@@ -4,9 +4,11 @@
 #include "processDef.h"
 #include "queueDef.h"
 
-void enQueue(QL **front, QL **rear, Pr val) {
+void enQueue(QL **front, QL **rear, Pr val)
+{
     QL *newNode = (QL *)malloc(sizeof(QL));
-    if (!newNode) {
+    if (!newNode)
+    {
         printf("Memory allocation failed\n");
         return;
     }
@@ -15,20 +17,25 @@ void enQueue(QL **front, QL **rear, Pr val) {
     newNode->data = val;
     newNode->link = NULL;
 
-    if (*front == NULL) {
+    if (*front == NULL)
+    {
         *front = newNode;
         *rear = newNode;
-    } else {
+    }
+    else
+    {
         (*rear)->link = newNode;
         *rear = newNode;
     }
 }
 
-Pr deQueue(QL **front) {
+Pr deQueue(QL **front)
+{
     Pr val;
     val.name = NULL;
-    
-    if (*front == NULL) {
+
+    if (*front == NULL)
+    {
         val.index = -1;
         return val;
     }
