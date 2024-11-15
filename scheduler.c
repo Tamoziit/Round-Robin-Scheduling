@@ -108,11 +108,11 @@ void *scheduler(void *threadargs)
                 tt++;
                 switchCount++;
                 queueMaintainer(allProcesses, n);
-            }
-            if (totalRemt > 0)
-            {
-                printf(" X ");
-                fflush(stdout);
+                if (totalRemt > 0)
+                {
+                    printf(" X ");
+                    fflush(stdout);
+                }
             }
 
             Pr temp = deQueue(&front);

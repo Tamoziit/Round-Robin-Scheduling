@@ -32,7 +32,6 @@ void enQueue(QL **front, QL **rear, Pr val)
 Pr deQueue(QL **front)
 {
     Pr val;
-    val.name = NULL;
 
     if (*front == NULL)
     {

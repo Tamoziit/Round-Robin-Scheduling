@@ -45,7 +45,7 @@ int main()
 		printf("Enter Arrival Time & Burst Time of Process no. %d\n", i + 1);
 		scanf("%d%d", &P[i].at, &P[i].bt);
 		sprintf(buffer, "P%d", i + 1);
-		P[i].name = strdup(buffer);
+		strcpy(P[i].name, buffer);
 		P[i].remt = P[i].bt;
 		totalRemt += P[i].remt;
 		P[i].index = i + 1;
@@ -96,7 +96,7 @@ int main()
 	for (i = 0; i < n; i++)
 	{
 		pthread_join(threads[i], &retval);
-		sleep(1);
+		//sleep(1);
 	}
 
 	printf("\n");

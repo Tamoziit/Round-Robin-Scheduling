@@ -11,7 +11,7 @@ typedef struct process
     int wt;
     int rt;
     int start;
-    char *name;
+    char name[10];
     int index;
     int enqueued;
     int cpu;
