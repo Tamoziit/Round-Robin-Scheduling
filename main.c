@@ -12,7 +12,8 @@ void table2(Pr *P, int n, int qt, int st, int switchCount, int tt);
 Pr *sortProcesses(Pr *arr, int n);
 void enQueue(QL **front, QL **rear, Pr val);
 Pr deQueue(QL **front);
-void *scheduler(void *threadargs);
+//void *scheduler(void *threadargs);
+void *scheduler2(void *threadargs);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t turn_cond = PTHREAD_COND_INITIALIZER;
@@ -86,7 +87,7 @@ int main()
 		args->processArray = P;
 		args->numProcesses = n;
 
-		if ((status = pthread_create(&threads[i], NULL, &scheduler, (void *)args)))
+		if ((status = pthread_create(&threads[i], NULL, &scheduler2, (void *)args)))
 		{
 			printf("Thread creation failed\n");
 			exit(0);
