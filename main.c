@@ -12,8 +12,8 @@ void table2(Pr *P, int n, int qt, int st, int switchCount, int tt);
 Pr *sortProcesses(Pr *arr, int n);
 void enQueue(QL **front, QL **rear, Pr val);
 Pr deQueue(QL **front);
-//void *scheduler(void *threadargs);
-void *scheduler2(void *threadargs);
+void *scheduler(void *threadargs);
+//void *scheduler2(void *threadargs);
 
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t turn_cond = PTHREAD_COND_INITIALIZER;
@@ -62,12 +62,16 @@ int main()
 	printf("Sorting Processes according to Arrival Time...\n");
 	P = sortProcesses(P, n);
 	printf("Sorted processes:\n");
-	for (i = 0; i < n; i++)
-		printf("%s:(%d); index = %d ", P[i].name, P[i].at, P[i].index);
+	table1(P, n, qt, st);
 	printf("\n");
 
 	/* Round Robin Init */
 	turn = P[0].index;
+	for(i=1; i<n; i++) {
+		if(P[i].at == P[0].at)
+			enQueue(&front, &rear, P[i]); //handling same initial AT for multiple processes
+	}
+
 	tt = P[0].at;
 	printf("Initially; tt = %d\n\nEvaluating Gantt Chart...\n\n", tt);
 
@@ -87,7 +91,7 @@ int main()
 		args->processArray = P;
 		args->numProcesses = n;
 
-		if ((status = pthread_create(&threads[i], NULL, &scheduler2, (void *)args)))
+		if ((status = pthread_create(&threads[i], NULL, &scheduler, (void *)args)))
 		{
 			printf("Thread creation failed\n");
 			exit(0);

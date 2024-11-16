@@ -10,12 +10,12 @@ void maxHeapify(Pr *arr, int i, int size)
 	int max;
 	Pr t;
 
-	if (l < size && arr[l].at > arr[i].at)
+	if (l < size && ((arr[l].at > arr[i].at) || (arr[l].at == arr[i].at && arr[l].bt > arr[i].bt) || (arr[l].at == arr[i].at && arr[l].bt == arr[i].bt && arr[l].index > arr[i].index)))
 		max = l;
 	else
 		max = i;
 
-	if (r < size && arr[r].at > arr[max].at)
+	if (r < size && ((arr[r].at > arr[max].at) || (arr[r].at == arr[max].at && arr[r].bt > arr[max].bt) || (arr[r].at == arr[max].at && arr[r].bt == arr[max].bt && arr[r].index > arr[max].index)))
 		max = r;
 
 	if (max != i)
